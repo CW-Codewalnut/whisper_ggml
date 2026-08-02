@@ -1,0 +1,13 @@
+# FVM Version Cache
+.fvm/
+
+.dart_tool/
+build/
+pubspec.lock
+
+# Native build caches
+.cxx/
+Podfile.lock
+
+# Local session logs
+.recall/

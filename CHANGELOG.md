@@ -1,6 +1,7 @@
 ## 2.5.0
 
 * Live transcription now works with locally provided model files ([#25](https://github.com/sk3llo/whisper_ggml/issues/25)): `WhisperController.transcribeLive` accepts `modelPath` as an alternative to `model`, and `startWhisperLiveSession` is now part of the public API — it takes a `modelPath` and leaves audio delivery to the caller via `WhisperLiveSession.feed`
+* Raised the declared SDK floor to what the package already required in practice: `sdk: '>=3.7.0 <4.0.0'` and `flutter: '>=3.29.0'`. Since 2.4.0, `ffi ^2.1.4` has needed Dart 3.7, but the stale `>=3.1.0` constraint made `pub get` fail with a version-solving error on older SDKs instead of a clear SDK-requirement message. Verified on the floor (Flutter 3.29.3 / Dart 3.7.2) and on current stable (3.44.8)
 
 ## 2.4.0
 
