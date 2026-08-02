@@ -18,6 +18,10 @@ class WhisperController {
 
   /// Start a live transcription session.
   ///
+  /// Provide exactly one of [model] and [modelPath]: [model] resolves to the
+  /// standard download location (see [getPath]), while [modelPath] runs the
+  /// session against any local ggml model file.
+  ///
   /// [pcm16Stream] must produce 16 kHz mono little-endian PCM16 audio (e.g.
   /// the `record` package's `startStream` with
   /// `RecordConfig(encoder: AudioEncoder.pcm16bits, sampleRate: 16000,
@@ -33,7 +37,8 @@ class WhisperController {
   /// noise floor is capped at [gateNoiseFloorCap]. Raise the cap for loud
   /// environments; lower [gateRmsMin] for very quiet speakers.
   Future<WhisperLiveSession> transcribeLive({
-    required WhisperModel model,
+    WhisperModel? model,
+    String? modelPath,
     required Stream<Uint8List> pcm16Stream,
     String lang = 'en',
     String? initialPrompt,
@@ -42,10 +47,15 @@ class WhisperController {
     double gateVoiceRatio = 2.5,
     double gateNoiseFloorCap = 0.01,
   }) async {
-    await initModel(model);
+    if ((model == null) == (modelPath == null)) {
+      throw ArgumentError('Provide exactly one of model or modelPath.');
+    }
+    if (model != null) {
+      await initModel(model);
+    }
 
     final WhisperLiveSession session = await startWhisperLiveSession(
-      modelPath: _modelPath,
+      modelPath: modelPath ?? _modelPath,
       lang: lang,
       initialPrompt: initialPrompt,
       suppressNonSpeechTokens: suppressNonSpeechTokens,

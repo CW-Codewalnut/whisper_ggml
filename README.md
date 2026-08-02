@@ -49,7 +49,7 @@ on-device, no server, no API keys.
 
 ```yaml
 dependencies:
-  whisper_ggml: ^2.4.0
+  whisper_ggml: ^2.5.0
 ```
 
 ## Quick start
@@ -143,6 +143,10 @@ Good to know:
 - Only one live session can run at a time.
 - Real non-speech sounds (knocks, clicks) may transcribe as bracketed
   annotations like `[door slams]`.
+- **Bring your own model:** pass `modelPath:` instead of `model:` to run
+  the session against any local ggml model file. For full manual control,
+  `startWhisperLiveSession(modelPath: ...)` is exported too — no audio
+  stream wiring, you call `session.feed(pcm16Bytes)` yourself.
 
 ## Models
 

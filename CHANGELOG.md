@@ -1,3 +1,7 @@
+## 2.5.0
+
+* Live transcription now works with locally provided model files ([#25](https://github.com/sk3llo/whisper_ggml/issues/25)): `WhisperController.transcribeLive` accepts `modelPath` as an alternative to `model`, and `startWhisperLiveSession` is now part of the public API — it takes a `modelPath` and leaves audio delivery to the caller via `WhisperLiveSession.feed`
+
 ## 2.4.0
 
 * Added transcription progress reporting ([#6](https://github.com/sk3llo/whisper_ggml/issues/6)): `transcribe` (controller and low-level API) takes an optional `onProgress` callback invoked with whisper.cpp's inference progress as a 0–100 percentage (coarse steps). Implemented via a `NativeCallable.listener` handed to `whisper_full_params.progress_callback`, so events arrive on the calling isolate without blocking inference

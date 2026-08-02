@@ -16,9 +16,10 @@ typedef _StreamStopNative = Pointer<Utf8> Function();
 
 /// A running live transcription session.
 ///
-/// Obtain one from `WhisperController.transcribeLive`. Listen to [partials]
-/// for progressively refined transcripts while audio is being fed, and call
-/// [stop] to get the final text and release the native context.
+/// Obtain one from `WhisperController.transcribeLive` or
+/// [startWhisperLiveSession]. Listen to [partials] for progressively refined
+/// transcripts while audio is being fed, and call [stop] to get the final
+/// text and release the native context.
 class WhisperLiveSession {
   WhisperLiveSession._(this._worker, this._toWorker, this._partials);
 
@@ -49,8 +50,20 @@ class WhisperLiveSession {
   }
 }
 
-/// Spawns the worker isolate and starts a native stream. Internal API used by
-/// `WhisperController.transcribeLive`.
+/// Start a live transcription session against the ggml model file at
+/// [modelPath].
+///
+/// This is the low-level entry point behind
+/// `WhisperController.transcribeLive`: it accepts any local model file and
+/// leaves audio delivery to the caller — feed 16 kHz mono little-endian
+/// PCM16 audio with [WhisperLiveSession.feed] and finish with
+/// [WhisperLiveSession.stop]. A worker isolate owns the native stream, so
+/// inference never blocks the calling isolate. Only one live session can
+/// run at a time.
+///
+/// The `gate*` parameters tune the native energy gate that keeps silence
+/// away from the decoder; see `WhisperController.transcribeLive` for
+/// details.
 Future<WhisperLiveSession> startWhisperLiveSession({
   required String modelPath,
   String lang = 'en',
