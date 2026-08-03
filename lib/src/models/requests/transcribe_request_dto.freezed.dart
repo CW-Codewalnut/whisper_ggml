@@ -52,6 +52,10 @@ mixin _$TranscribeRequestDto {
   bool get keepModelLoaded;
   @JsonKey(name: 'audio_ctx')
   int get audioCtx;
+  @JsonKey(name: 'vad_model')
+  String? get vadModelPath;
+  @JsonKey(name: 'vad_speech_pad_ms')
+  int get vadSpeechPadMs;
 
   /// Create a copy of TranscribeRequestDto
   /// with the given fields replaced by the non-null parameter values.
@@ -104,7 +108,11 @@ mixin _$TranscribeRequestDto {
             (identical(other.keepModelLoaded, keepModelLoaded) ||
                 other.keepModelLoaded == keepModelLoaded) &&
             (identical(other.audioCtx, audioCtx) ||
-                other.audioCtx == audioCtx));
+                other.audioCtx == audioCtx) &&
+            (identical(other.vadModelPath, vadModelPath) ||
+                other.vadModelPath == vadModelPath) &&
+            (identical(other.vadSpeechPadMs, vadSpeechPadMs) ||
+                other.vadSpeechPadMs == vadSpeechPadMs));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -130,12 +138,14 @@ mixin _$TranscribeRequestDto {
         suppressNonSpeechTokens,
         progressCallback,
         keepModelLoaded,
-        audioCtx
+        audioCtx,
+        vadModelPath,
+        vadSpeechPadMs
       ]);
 
   @override
   String toString() {
-    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
+    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx, vadModelPath: $vadModelPath, vadSpeechPadMs: $vadSpeechPadMs)';
   }
 }
 
@@ -165,7 +175,9 @@ abstract mixin class $TranscribeRequestDtoCopyWith<$Res> {
       @JsonKey(name: 'suppress_non_speech_tokens') bool suppressNonSpeechTokens,
       @JsonKey(name: 'progress_callback') int? progressCallback,
       @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
-      @JsonKey(name: 'audio_ctx') int audioCtx});
+      @JsonKey(name: 'audio_ctx') int audioCtx,
+      @JsonKey(name: 'vad_model') String? vadModelPath,
+      @JsonKey(name: 'vad_speech_pad_ms') int vadSpeechPadMs});
 }
 
 /// @nodoc
@@ -201,6 +213,8 @@ class _$TranscribeRequestDtoCopyWithImpl<$Res>
     Object? progressCallback = freezed,
     Object? keepModelLoaded = null,
     Object? audioCtx = null,
+    Object? vadModelPath = freezed,
+    Object? vadSpeechPadMs = null,
   }) {
     return _then(_self.copyWith(
       audio: null == audio
@@ -282,6 +296,14 @@ class _$TranscribeRequestDtoCopyWithImpl<$Res>
       audioCtx: null == audioCtx
           ? _self.audioCtx
           : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
+      vadModelPath: freezed == vadModelPath
+          ? _self.vadModelPath
+          : vadModelPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      vadSpeechPadMs: null == vadSpeechPadMs
+          ? _self.vadSpeechPadMs
+          : vadSpeechPadMs // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -401,7 +423,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             bool suppressNonSpeechTokens,
             @JsonKey(name: 'progress_callback') int? progressCallback,
             @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
-            @JsonKey(name: 'audio_ctx') int audioCtx)?
+            @JsonKey(name: 'audio_ctx') int audioCtx,
+            @JsonKey(name: 'vad_model') String? vadModelPath,
+            @JsonKey(name: 'vad_speech_pad_ms') int vadSpeechPadMs)?
         $default, {
     required TResult orElse(),
   }) {
@@ -428,7 +452,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             _that.suppressNonSpeechTokens,
             _that.progressCallback,
             _that.keepModelLoaded,
-            _that.audioCtx);
+            _that.audioCtx,
+            _that.vadModelPath,
+            _that.vadSpeechPadMs);
       case _:
         return orElse();
     }
@@ -470,7 +496,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             bool suppressNonSpeechTokens,
             @JsonKey(name: 'progress_callback') int? progressCallback,
             @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
-            @JsonKey(name: 'audio_ctx') int audioCtx)
+            @JsonKey(name: 'audio_ctx') int audioCtx,
+            @JsonKey(name: 'vad_model') String? vadModelPath,
+            @JsonKey(name: 'vad_speech_pad_ms') int vadSpeechPadMs)
         $default,
   ) {
     final _that = this;
@@ -496,7 +524,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             _that.suppressNonSpeechTokens,
             _that.progressCallback,
             _that.keepModelLoaded,
-            _that.audioCtx);
+            _that.audioCtx,
+            _that.vadModelPath,
+            _that.vadSpeechPadMs);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -537,7 +567,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             bool suppressNonSpeechTokens,
             @JsonKey(name: 'progress_callback') int? progressCallback,
             @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
-            @JsonKey(name: 'audio_ctx') int audioCtx)?
+            @JsonKey(name: 'audio_ctx') int audioCtx,
+            @JsonKey(name: 'vad_model') String? vadModelPath,
+            @JsonKey(name: 'vad_speech_pad_ms') int vadSpeechPadMs)?
         $default,
   ) {
     final _that = this;
@@ -563,7 +595,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             _that.suppressNonSpeechTokens,
             _that.progressCallback,
             _that.keepModelLoaded,
-            _that.audioCtx);
+            _that.audioCtx,
+            _that.vadModelPath,
+            _that.vadSpeechPadMs);
       case _:
         return null;
     }
@@ -594,7 +628,9 @@ class _TranscribeRequestDto extends TranscribeRequestDto {
       this.suppressNonSpeechTokens = false,
       @JsonKey(name: 'progress_callback') this.progressCallback,
       @JsonKey(name: 'keep_model_loaded') this.keepModelLoaded = false,
-      @JsonKey(name: 'audio_ctx') this.audioCtx = 0})
+      @JsonKey(name: 'audio_ctx') this.audioCtx = 0,
+      @JsonKey(name: 'vad_model') this.vadModelPath,
+      @JsonKey(name: 'vad_speech_pad_ms') this.vadSpeechPadMs = -1})
       : super._();
   factory _TranscribeRequestDto.fromJson(Map<String, dynamic> json) =>
       _$TranscribeRequestDtoFromJson(json);
@@ -657,6 +693,12 @@ class _TranscribeRequestDto extends TranscribeRequestDto {
   @override
   @JsonKey(name: 'audio_ctx')
   final int audioCtx;
+  @override
+  @JsonKey(name: 'vad_model')
+  final String? vadModelPath;
+  @override
+  @JsonKey(name: 'vad_speech_pad_ms')
+  final int vadSpeechPadMs;
 
   /// Create a copy of TranscribeRequestDto
   /// with the given fields replaced by the non-null parameter values.
@@ -714,7 +756,11 @@ class _TranscribeRequestDto extends TranscribeRequestDto {
             (identical(other.keepModelLoaded, keepModelLoaded) ||
                 other.keepModelLoaded == keepModelLoaded) &&
             (identical(other.audioCtx, audioCtx) ||
-                other.audioCtx == audioCtx));
+                other.audioCtx == audioCtx) &&
+            (identical(other.vadModelPath, vadModelPath) ||
+                other.vadModelPath == vadModelPath) &&
+            (identical(other.vadSpeechPadMs, vadSpeechPadMs) ||
+                other.vadSpeechPadMs == vadSpeechPadMs));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -740,12 +786,14 @@ class _TranscribeRequestDto extends TranscribeRequestDto {
         suppressNonSpeechTokens,
         progressCallback,
         keepModelLoaded,
-        audioCtx
+        audioCtx,
+        vadModelPath,
+        vadSpeechPadMs
       ]);
 
   @override
   String toString() {
-    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
+    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx, vadModelPath: $vadModelPath, vadSpeechPadMs: $vadSpeechPadMs)';
   }
 }
 
@@ -777,7 +825,9 @@ abstract mixin class _$TranscribeRequestDtoCopyWith<$Res>
       @JsonKey(name: 'suppress_non_speech_tokens') bool suppressNonSpeechTokens,
       @JsonKey(name: 'progress_callback') int? progressCallback,
       @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
-      @JsonKey(name: 'audio_ctx') int audioCtx});
+      @JsonKey(name: 'audio_ctx') int audioCtx,
+      @JsonKey(name: 'vad_model') String? vadModelPath,
+      @JsonKey(name: 'vad_speech_pad_ms') int vadSpeechPadMs});
 }
 
 /// @nodoc
@@ -813,6 +863,8 @@ class __$TranscribeRequestDtoCopyWithImpl<$Res>
     Object? progressCallback = freezed,
     Object? keepModelLoaded = null,
     Object? audioCtx = null,
+    Object? vadModelPath = freezed,
+    Object? vadSpeechPadMs = null,
   }) {
     return _then(_TranscribeRequestDto(
       audio: null == audio
@@ -894,6 +946,14 @@ class __$TranscribeRequestDtoCopyWithImpl<$Res>
       audioCtx: null == audioCtx
           ? _self.audioCtx
           : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
+      vadModelPath: freezed == vadModelPath
+          ? _self.vadModelPath
+          : vadModelPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      vadSpeechPadMs: null == vadSpeechPadMs
+          ? _self.vadSpeechPadMs
+          : vadSpeechPadMs // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }

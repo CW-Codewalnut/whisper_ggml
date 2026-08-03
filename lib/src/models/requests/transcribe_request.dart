@@ -74,6 +74,19 @@ abstract class TranscribeRequest with _$TranscribeRequest {
     /// explicit [language] — auto-detection over a truncated window
     /// misfires.
     @Default(0) int audioCtx,
+
+    /// Path to a Silero VAD model (e.g. `ggml-silero-v5.1.2.bin`) to
+    /// enable whisper.cpp's built-in voice activity detection: non-speech
+    /// is trimmed before decoding, which stops whisper hallucinating or
+    /// looping over leading/trailing silence in push-to-talk recordings.
+    /// Null (default) leaves VAD off.
+    @Default(null) String? vadModelPath,
+
+    /// Overrides the VAD `speech_pad_ms` (audio kept around each detected
+    /// speech segment). Too little clips the first word; too much invites
+    /// the silence artifacts VAD exists to remove. Negative (default)
+    /// keeps whisper.cpp's default.
+    @Default(-1) int vadSpeechPadMs,
   }) = _TranscribeRequest;
   const TranscribeRequest._();
 }

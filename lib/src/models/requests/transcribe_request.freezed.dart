@@ -83,6 +83,19 @@ mixin _$TranscribeRequest {
   /// misfires.
   int get audioCtx;
 
+  /// Path to a Silero VAD model (e.g. `ggml-silero-v5.1.2.bin`) to
+  /// enable whisper.cpp's built-in voice activity detection: non-speech
+  /// is trimmed before decoding, which stops whisper hallucinating or
+  /// looping over leading/trailing silence in push-to-talk recordings.
+  /// Null (default) leaves VAD off.
+  String? get vadModelPath;
+
+  /// Overrides the VAD `speech_pad_ms` (audio kept around each detected
+  /// speech segment). Too little clips the first word; too much invites
+  /// the silence artifacts VAD exists to remove. Negative (default)
+  /// keeps whisper.cpp's default.
+  int get vadSpeechPadMs;
+
   /// Create a copy of TranscribeRequest
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -130,7 +143,11 @@ mixin _$TranscribeRequest {
             (identical(other.keepModelLoaded, keepModelLoaded) ||
                 other.keepModelLoaded == keepModelLoaded) &&
             (identical(other.audioCtx, audioCtx) ||
-                other.audioCtx == audioCtx));
+                other.audioCtx == audioCtx) &&
+            (identical(other.vadModelPath, vadModelPath) ||
+                other.vadModelPath == vadModelPath) &&
+            (identical(other.vadSpeechPadMs, vadSpeechPadMs) ||
+                other.vadSpeechPadMs == vadSpeechPadMs));
   }
 
   @override
@@ -154,12 +171,14 @@ mixin _$TranscribeRequest {
         noContext,
         suppressNonSpeechTokens,
         keepModelLoaded,
-        audioCtx
+        audioCtx,
+        vadModelPath,
+        vadSpeechPadMs
       ]);
 
   @override
   String toString() {
-    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
+    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx, vadModelPath: $vadModelPath, vadSpeechPadMs: $vadSpeechPadMs)';
   }
 }
 
@@ -188,7 +207,9 @@ abstract mixin class $TranscribeRequestCopyWith<$Res> {
       bool noContext,
       bool suppressNonSpeechTokens,
       bool keepModelLoaded,
-      int audioCtx});
+      int audioCtx,
+      String? vadModelPath,
+      int vadSpeechPadMs});
 }
 
 /// @nodoc
@@ -223,6 +244,8 @@ class _$TranscribeRequestCopyWithImpl<$Res>
     Object? suppressNonSpeechTokens = null,
     Object? keepModelLoaded = null,
     Object? audioCtx = null,
+    Object? vadModelPath = freezed,
+    Object? vadSpeechPadMs = null,
   }) {
     return _then(_self.copyWith(
       audio: null == audio
@@ -300,6 +323,14 @@ class _$TranscribeRequestCopyWithImpl<$Res>
       audioCtx: null == audioCtx
           ? _self.audioCtx
           : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
+      vadModelPath: freezed == vadModelPath
+          ? _self.vadModelPath
+          : vadModelPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      vadSpeechPadMs: null == vadSpeechPadMs
+          ? _self.vadSpeechPadMs
+          : vadSpeechPadMs // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -417,7 +448,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             bool noContext,
             bool suppressNonSpeechTokens,
             bool keepModelLoaded,
-            int audioCtx)?
+            int audioCtx,
+            String? vadModelPath,
+            int vadSpeechPadMs)?
         $default, {
     required TResult orElse(),
   }) {
@@ -443,7 +476,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             _that.noContext,
             _that.suppressNonSpeechTokens,
             _that.keepModelLoaded,
-            _that.audioCtx);
+            _that.audioCtx,
+            _that.vadModelPath,
+            _that.vadSpeechPadMs);
       case _:
         return orElse();
     }
@@ -483,7 +518,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             bool noContext,
             bool suppressNonSpeechTokens,
             bool keepModelLoaded,
-            int audioCtx)
+            int audioCtx,
+            String? vadModelPath,
+            int vadSpeechPadMs)
         $default,
   ) {
     final _that = this;
@@ -508,7 +545,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             _that.noContext,
             _that.suppressNonSpeechTokens,
             _that.keepModelLoaded,
-            _that.audioCtx);
+            _that.audioCtx,
+            _that.vadModelPath,
+            _that.vadSpeechPadMs);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -547,7 +586,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             bool noContext,
             bool suppressNonSpeechTokens,
             bool keepModelLoaded,
-            int audioCtx)?
+            int audioCtx,
+            String? vadModelPath,
+            int vadSpeechPadMs)?
         $default,
   ) {
     final _that = this;
@@ -572,7 +613,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             _that.noContext,
             _that.suppressNonSpeechTokens,
             _that.keepModelLoaded,
-            _that.audioCtx);
+            _that.audioCtx,
+            _that.vadModelPath,
+            _that.vadSpeechPadMs);
       case _:
         return null;
     }
@@ -601,7 +644,9 @@ class _TranscribeRequest extends TranscribeRequest {
       this.noContext = false,
       this.suppressNonSpeechTokens = false,
       this.keepModelLoaded = false,
-      this.audioCtx = 0})
+      this.audioCtx = 0,
+      this.vadModelPath = null,
+      this.vadSpeechPadMs = -1})
       : super._();
 
   @override
@@ -710,6 +755,23 @@ class _TranscribeRequest extends TranscribeRequest {
   @JsonKey()
   final int audioCtx;
 
+  /// Path to a Silero VAD model (e.g. `ggml-silero-v5.1.2.bin`) to
+  /// enable whisper.cpp's built-in voice activity detection: non-speech
+  /// is trimmed before decoding, which stops whisper hallucinating or
+  /// looping over leading/trailing silence in push-to-talk recordings.
+  /// Null (default) leaves VAD off.
+  @override
+  @JsonKey()
+  final String? vadModelPath;
+
+  /// Overrides the VAD `speech_pad_ms` (audio kept around each detected
+  /// speech segment). Too little clips the first word; too much invites
+  /// the silence artifacts VAD exists to remove. Negative (default)
+  /// keeps whisper.cpp's default.
+  @override
+  @JsonKey()
+  final int vadSpeechPadMs;
+
   /// Create a copy of TranscribeRequest
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -757,7 +819,11 @@ class _TranscribeRequest extends TranscribeRequest {
             (identical(other.keepModelLoaded, keepModelLoaded) ||
                 other.keepModelLoaded == keepModelLoaded) &&
             (identical(other.audioCtx, audioCtx) ||
-                other.audioCtx == audioCtx));
+                other.audioCtx == audioCtx) &&
+            (identical(other.vadModelPath, vadModelPath) ||
+                other.vadModelPath == vadModelPath) &&
+            (identical(other.vadSpeechPadMs, vadSpeechPadMs) ||
+                other.vadSpeechPadMs == vadSpeechPadMs));
   }
 
   @override
@@ -781,12 +847,14 @@ class _TranscribeRequest extends TranscribeRequest {
         noContext,
         suppressNonSpeechTokens,
         keepModelLoaded,
-        audioCtx
+        audioCtx,
+        vadModelPath,
+        vadSpeechPadMs
       ]);
 
   @override
   String toString() {
-    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
+    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx, vadModelPath: $vadModelPath, vadSpeechPadMs: $vadSpeechPadMs)';
   }
 }
 
@@ -817,7 +885,9 @@ abstract mixin class _$TranscribeRequestCopyWith<$Res>
       bool noContext,
       bool suppressNonSpeechTokens,
       bool keepModelLoaded,
-      int audioCtx});
+      int audioCtx,
+      String? vadModelPath,
+      int vadSpeechPadMs});
 }
 
 /// @nodoc
@@ -852,6 +922,8 @@ class __$TranscribeRequestCopyWithImpl<$Res>
     Object? suppressNonSpeechTokens = null,
     Object? keepModelLoaded = null,
     Object? audioCtx = null,
+    Object? vadModelPath = freezed,
+    Object? vadSpeechPadMs = null,
   }) {
     return _then(_TranscribeRequest(
       audio: null == audio
@@ -929,6 +1001,14 @@ class __$TranscribeRequestCopyWithImpl<$Res>
       audioCtx: null == audioCtx
           ? _self.audioCtx
           : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
+      vadModelPath: freezed == vadModelPath
+          ? _self.vadModelPath
+          : vadModelPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      vadSpeechPadMs: null == vadSpeechPadMs
+          ? _self.vadSpeechPadMs
+          : vadSpeechPadMs // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }

@@ -41,6 +41,8 @@ abstract class TranscribeRequestDto
     @JsonKey(name: 'progress_callback') int? progressCallback,
     @JsonKey(name: 'keep_model_loaded') @Default(false) bool keepModelLoaded,
     @JsonKey(name: 'audio_ctx') @Default(0) int audioCtx,
+    @JsonKey(name: 'vad_model') String? vadModelPath,
+    @JsonKey(name: 'vad_speech_pad_ms') @Default(-1) int vadSpeechPadMs,
   }) = _TranscribeRequestDto;
 
   /// Convert [request] to TranscribeRequestDto with specified [modelPath]
@@ -70,6 +72,8 @@ abstract class TranscribeRequestDto
       progressCallback: progressCallbackAddress,
       keepModelLoaded: request.keepModelLoaded,
       audioCtx: request.audioCtx,
+      vadModelPath: request.vadModelPath,
+      vadSpeechPadMs: request.vadSpeechPadMs,
     );
   }
   const TranscribeRequestDto._();

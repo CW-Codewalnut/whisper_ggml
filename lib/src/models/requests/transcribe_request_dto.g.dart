@@ -30,6 +30,8 @@ _TranscribeRequestDto _$TranscribeRequestDtoFromJson(
       progressCallback: (json['progress_callback'] as num?)?.toInt(),
       keepModelLoaded: json['keep_model_loaded'] as bool? ?? false,
       audioCtx: (json['audio_ctx'] as num?)?.toInt() ?? 0,
+      vadModelPath: json['vad_model'] as String?,
+      vadSpeechPadMs: (json['vad_speech_pad_ms'] as num?)?.toInt() ?? -1,
     );
 
 Map<String, dynamic> _$TranscribeRequestDtoToJson(
@@ -55,4 +57,6 @@ Map<String, dynamic> _$TranscribeRequestDtoToJson(
       'progress_callback': instance.progressCallback,
       'keep_model_loaded': instance.keepModelLoaded,
       'audio_ctx': instance.audioCtx,
+      'vad_model': instance.vadModelPath,
+      'vad_speech_pad_ms': instance.vadSpeechPadMs,
     };
