@@ -39,6 +39,7 @@ abstract class TranscribeRequestDto
     /// Address of a `NativeCallable<Void Function(Int32)>` the native layer
     /// invokes with transcription progress (0–100); null disables it.
     @JsonKey(name: 'progress_callback') int? progressCallback,
+    @JsonKey(name: 'keep_model_loaded') @Default(false) bool keepModelLoaded,
   }) = _TranscribeRequestDto;
 
   /// Convert [request] to TranscribeRequestDto with specified [modelPath]
@@ -66,6 +67,7 @@ abstract class TranscribeRequestDto
       noContext: request.noContext,
       suppressNonSpeechTokens: request.suppressNonSpeechTokens,
       progressCallback: progressCallbackAddress,
+      keepModelLoaded: request.keepModelLoaded,
     );
   }
   const TranscribeRequestDto._();

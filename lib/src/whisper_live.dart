@@ -64,12 +64,20 @@ class WhisperLiveSession {
 /// The `gate*` parameters tune the native energy gate that keeps silence
 /// away from the decoder; see `WhisperController.transcribeLive` for
 /// details.
+///
+/// [keepModelLoaded] parks the session's model in native memory on
+/// [WhisperLiveSession.stop] instead of freeing it, so the next session
+/// (or one-shot transcription) with the same model file skips the
+/// multi-second load — see `TranscribeRequest.keepModelLoaded` for the
+/// memory trade-off. A session also borrows an already-parked model
+/// automatically when the path matches, and returns it on stop.
 Future<WhisperLiveSession> startWhisperLiveSession({
   required String modelPath,
   String lang = 'en',
   bool translate = false,
   String? initialPrompt,
   bool suppressNonSpeechTokens = false,
+  bool keepModelLoaded = false,
   int threads = 4,
   double gateRmsMin = 0.0015,
   double gateVoiceRatio = 2.5,
@@ -131,6 +139,7 @@ Future<WhisperLiveSession> startWhisperLiveSession({
       'is_translate': translate,
       'threads': threads,
       'suppress_non_speech_tokens': suppressNonSpeechTokens,
+      'keep_model_loaded': keepModelLoaded,
       'gate_rms_min': gateRmsMin,
       'gate_voice_ratio': gateVoiceRatio,
       'gate_floor_cap': gateNoiseFloorCap,

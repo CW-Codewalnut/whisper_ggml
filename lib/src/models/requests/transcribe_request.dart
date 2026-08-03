@@ -57,6 +57,32 @@ abstract class TranscribeRequest with _$TranscribeRequest {
     ///
     /// Default `false` matches whisper.cpp's default.
     @Default(false) bool suppressNonSpeechTokens,
+
+    /// Keep the model resident in native memory after this request.
+    ///
+    /// By default every transcription loads the model file from disk
+    /// (seconds for the small models and up) and frees it when the request
+    /// completes. With [keepModelLoaded] set, the loaded model is parked in
+    /// the native layer instead, and the next transcription with the same
+    /// model file skips the load entirely — for push-to-talk dictation and
+    /// other short repeated requests this removes most of the per-request
+    /// latency.
+    ///
+    /// A reused model transcribes exactly like a freshly loaded one: no
+    /// text or decoder state carries over between requests, and
+    /// [initialPrompt] and the other parameters apply per request as
+    /// before.
+    ///
+    /// The parked model keeps its full weights in RAM (from ~100 MB for
+    /// `tiny` up to several GB for the large models) until released. Free
+    /// it with `Whisper.releaseModel`, or by running one transcription with
+    /// the same model and [keepModelLoaded] back to `false`. Only one model
+    /// stays resident per process: parking a different model replaces (and
+    /// frees) the previous one.
+    ///
+    /// Default `false` preserves the load-per-request behaviour of every
+    /// previous version.
+    @Default(false) bool keepModelLoaded,
   }) = _TranscribeRequest;
   const TranscribeRequest._();
 }

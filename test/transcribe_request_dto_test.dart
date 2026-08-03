@@ -96,6 +96,27 @@ void main() {
 
       expect(dto.initialPrompt, isNull);
       expect(dto.noContext, isFalse);
+      expect(dto.keepModelLoaded, isFalse);
+    });
+
+    test('keepModelLoaded defaults to false and forwards true', () {
+      final defaultDto = TranscribeRequestDto.fromTranscribeRequest(
+        request(),
+        '/tmp/model.bin',
+      );
+      final defaultBody =
+          json.decode(defaultDto.toRequestString()) as Map<String, dynamic>;
+      expect(defaultBody['keep_model_loaded'], isFalse);
+
+      final dto = TranscribeRequestDto.fromTranscribeRequest(
+        const TranscribeRequest(
+          audio: '/tmp/audio.wav',
+          keepModelLoaded: true,
+        ),
+        '/tmp/model.bin',
+      );
+      final body = json.decode(dto.toRequestString()) as Map<String, dynamic>;
+      expect(body['keep_model_loaded'], isTrue);
     });
   });
 }

@@ -36,6 +36,11 @@ class WhisperController {
   /// `max(gateVoiceRatio * noiseFloor, gateRmsMin)`, where the adaptive
   /// noise floor is capped at [gateNoiseFloorCap]. Raise the cap for loud
   /// environments; lower [gateRmsMin] for very quiet speakers.
+  ///
+  /// [keepModelLoaded] parks the model in native memory when the session
+  /// stops, so the next session (or one-shot [transcribe]) with the same
+  /// model skips the multi-second load — see
+  /// [TranscribeRequest.keepModelLoaded]. Release it with [releaseModel].
   Future<WhisperLiveSession> transcribeLive({
     WhisperModel? model,
     String? modelPath,
@@ -43,6 +48,7 @@ class WhisperController {
     String lang = 'en',
     String? initialPrompt,
     bool suppressNonSpeechTokens = false,
+    bool keepModelLoaded = false,
     double gateRmsMin = 0.0015,
     double gateVoiceRatio = 2.5,
     double gateNoiseFloorCap = 0.01,
@@ -59,6 +65,7 @@ class WhisperController {
       lang: lang,
       initialPrompt: initialPrompt,
       suppressNonSpeechTokens: suppressNonSpeechTokens,
+      keepModelLoaded: keepModelLoaded,
       gateRmsMin: gateRmsMin,
       gateVoiceRatio: gateVoiceRatio,
       gateNoiseFloorCap: gateNoiseFloorCap,
@@ -90,6 +97,11 @@ class WhisperController {
   ///
   /// [onProgress] reports transcription progress as a 0–100 percentage
   /// (coarse steps) while inference runs.
+  ///
+  /// [keepModelLoaded] keeps the model resident in native memory after the
+  /// request, so the next transcription with the same model skips the
+  /// multi-second load — see [TranscribeRequest.keepModelLoaded]. Release
+  /// it with [releaseModel].
   Future<TranscribeResult?> transcribe({
     required WhisperModel model,
     required String audioPath,
@@ -100,6 +112,7 @@ class WhisperController {
     bool suppressNonSpeechTokens = false,
     bool withSegments = false,
     bool splitOnWord = false,
+    bool keepModelLoaded = false,
     void Function(int percent)? onProgress,
   }) async {
     await initModel(model);
@@ -121,6 +134,7 @@ class WhisperController {
           initialPrompt: initialPrompt,
           noContext: noContext,
           suppressNonSpeechTokens: suppressNonSpeechTokens,
+          keepModelLoaded: keepModelLoaded,
         ),
         modelPath: _modelPath,
         onProgress: onProgress,
@@ -136,6 +150,14 @@ class WhisperController {
       debugPrint(e.toString());
       return null;
     }
+  }
+
+  /// Free the model parked in native memory by a transcription with
+  /// `keepModelLoaded: true`. Safe to call when nothing is parked.
+  Future<void> releaseModel() {
+    // Which model the Whisper instance was created with is irrelevant here:
+    // the native side frees whatever model is parked.
+    return const Whisper(model: WhisperModel.tiny).releaseModel();
   }
 
   static Future<String> getModelDir() async {

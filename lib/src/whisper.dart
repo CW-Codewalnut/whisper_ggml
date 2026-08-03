@@ -8,6 +8,7 @@ import 'package:universal_io/io.dart';
 import 'package:whisper_ggml/src/models/whisper_model.dart';
 import 'package:whisper_ggml/src/whisper_audio_convert.dart';
 
+import 'models/requests/release_model_request.dart';
 import 'models/requests/transcribe_request.dart';
 import 'models/requests/transcribe_request_dto.dart';
 import 'models/requests/version_request.dart';
@@ -110,6 +111,21 @@ class Whisper {
       rethrow;
     } finally {
       progressCallable?.close();
+    }
+  }
+
+  /// Free the model parked in native memory by a transcription with
+  /// `keepModelLoaded: true`. Safe to call when nothing is parked.
+  ///
+  /// A transcription still in flight keeps its model until it completes;
+  /// one that was started with `keepModelLoaded: true` parks the model
+  /// again when it finishes.
+  Future<void> releaseModel() async {
+    final Map<String, dynamic> result = await _request(
+      whisperRequest: const ReleaseModelRequest(),
+    );
+    if (result['@type'] == 'error') {
+      throw Exception(result['message']);
     }
   }
 
