@@ -124,4 +124,24 @@ class Whisper {
     );
     return response.message;
   }
+
+  /// Free the model kept resident by a transcription with
+  /// `keepModelLoaded: true`. Safe to call when nothing is resident.
+  Future<void> releaseModel() async {
+    await _request(whisperRequest: const ReleaseModelRequest());
+  }
+}
+
+/// Frees the resident model (see `TranscribeRequest.keepModelLoaded`).
+class ReleaseModelRequest implements WhisperRequestDto {
+  ///
+  const ReleaseModelRequest();
+
+  @override
+  String get specialType => 'releaseModel';
+
+  @override
+  String toRequestString() {
+    return '{"@type": "$specialType"}';
+  }
 }

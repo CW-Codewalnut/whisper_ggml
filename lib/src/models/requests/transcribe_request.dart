@@ -57,6 +57,23 @@ abstract class TranscribeRequest with _$TranscribeRequest {
     ///
     /// Default `false` matches whisper.cpp's default.
     @Default(false) bool suppressNonSpeechTokens,
+
+    /// Keep the loaded model resident in the native layer after this
+    /// request, so the next transcription with the same model file skips
+    /// the multi-second reload (push-to-talk dictation). Release the
+    /// resident model with `Whisper.releaseModel`, or by transcribing
+    /// once with this set back to `false`.
+    ///
+    /// Default `false` preserves the load-per-request behaviour of every
+    /// previous version.
+    @Default(false) bool keepModelLoaded,
+
+    /// Sets `whisper_full_params.audio_ctx`: shrink the encoder window
+    /// for short clips (a large CPU speed-up). `0` keeps whisper.cpp's
+    /// default full window. Only pass a reduced value together with an
+    /// explicit [language] — auto-detection over a truncated window
+    /// misfires.
+    @Default(0) int audioCtx,
   }) = _TranscribeRequest;
   const TranscribeRequest._();
 }

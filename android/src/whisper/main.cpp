@@ -74,6 +74,18 @@ struct whisper_params
     // Address of a Dart NativeCallable<Void Function(Int32)>; 0 = none.
     uint64_t progress_cb_addr = 0;
 
+    // Keep the loaded model resident after this request, so repeated
+    // transcriptions with the same model skip the multi-second reload
+    // (push-to-talk dictation). Release with an explicit "releaseModel"
+    // request or by transcribing with keep_model_loaded=false.
+    bool keep_model_loaded = false;
+
+    // whisper_full_params.audio_ctx: shrink the encoder window for short
+    // clips (huge speed-up on CPU); 0 keeps whisper.cpp's default (full
+    // window). Callers must only pass a reduced value with an explicit
+    // language: auto-detection over a truncated window misfires.
+    int32_t audio_ctx = 0;
+
     std::string language = "auto";
     std::string prompt;
     std::string model = "models/ggml-tiny.bin";
@@ -88,6 +100,31 @@ struct whisper_print_user_data
 
     const std::vector<std::vector<float>> *pcmf32s;
 };
+
+// Resident model for repeated file transcriptions: survives between
+// requests when keep_model_loaded is set, keyed by model path. Guarded by
+// a mutex because the Dart side may issue requests from short-lived
+// isolates.
+static struct
+{
+    struct whisper_context *ctx = nullptr;
+    std::string model;
+    std::mutex mutex;
+} g_transcribe_cache;
+
+json release_model() noexcept
+{
+    json jsonResult;
+    std::lock_guard<std::mutex> lock(g_transcribe_cache.mutex);
+    if (g_transcribe_cache.ctx)
+    {
+        whisper_free(g_transcribe_cache.ctx);
+        g_transcribe_cache.ctx = nullptr;
+        g_transcribe_cache.model.clear();
+    }
+    jsonResult["@type"] = "releaseModel";
+    return jsonResult;
+}
 
 json transcribe(json jsonBody) noexcept
 {
@@ -121,6 +158,14 @@ json transcribe(json jsonBody) noexcept
     {
         params.progress_cb_addr = jsonBody["progress_callback"].get<uint64_t>();
     }
+    if (jsonBody.contains("keep_model_loaded") && jsonBody["keep_model_loaded"].is_boolean())
+    {
+        params.keep_model_loaded = jsonBody["keep_model_loaded"].get<bool>();
+    }
+    if (jsonBody.contains("audio_ctx") && jsonBody["audio_ctx"].is_number_integer())
+    {
+        params.audio_ctx = jsonBody["audio_ctx"].get<int32_t>();
+    }
     json jsonResult;
     jsonResult["@type"] = "transcribe";
 
@@ -136,11 +181,27 @@ json transcribe(json jsonBody) noexcept
         params.seed = time(NULL);
     }
 
-    // whisper init
-    struct whisper_context_params cparams = whisper_context_default_params();
-    cparams.use_gpu = false; // CPU-only build
-    struct whisper_context *ctx =
-        whisper_init_from_file_with_params(params.model.c_str(), cparams);
+    // whisper init: reuse the resident context when the model matches,
+    // otherwise (re)load. The lock spans the whole transcription so the
+    // cached context is never freed mid-decode by a competing request.
+    std::lock_guard<std::mutex> cache_lock(g_transcribe_cache.mutex);
+    struct whisper_context *ctx = nullptr;
+    if (g_transcribe_cache.ctx && g_transcribe_cache.model == params.model)
+    {
+        ctx = g_transcribe_cache.ctx;
+    }
+    else
+    {
+        if (g_transcribe_cache.ctx)
+        {
+            whisper_free(g_transcribe_cache.ctx);
+            g_transcribe_cache.ctx = nullptr;
+            g_transcribe_cache.model.clear();
+        }
+        struct whisper_context_params cparams = whisper_context_default_params();
+        cparams.use_gpu = false; // CPU-only build
+        ctx = whisper_init_from_file_with_params(params.model.c_str(), cparams);
+    }
     if (ctx == nullptr)
     {
         // Without this check a missing/corrupt model file crashes in
@@ -149,6 +210,22 @@ json transcribe(json jsonBody) noexcept
         jsonResult["message"] = "failed to load model " + params.model;
         return jsonResult;
     }
+    // Cache or free the context on every exit path. Errors keep the model
+    // resident too (when requested): a bad WAV must not cost a reload.
+    auto release_ctx = [&]()
+    {
+        if (params.keep_model_loaded)
+        {
+            g_transcribe_cache.ctx = ctx;
+            g_transcribe_cache.model = params.model;
+        }
+        else
+        {
+            whisper_free(ctx);
+            g_transcribe_cache.ctx = nullptr;
+            g_transcribe_cache.model.clear();
+        }
+    };
     std::string text_result = "";
     const auto fname_inp = params.audio;
     // WAV input
@@ -159,7 +236,7 @@ json transcribe(json jsonBody) noexcept
         {
             jsonResult["@type"] = "error";
             jsonResult["message"] = " failed to open WAV file ";
-            whisper_free(ctx);
+            release_ctx();
             return jsonResult;
         }
 
@@ -168,7 +245,7 @@ json transcribe(json jsonBody) noexcept
             jsonResult["@type"] = "error";
             jsonResult["message"] = "must be mono or stereo";
             drwav_uninit(&wav);
-            whisper_free(ctx);
+            release_ctx();
             return jsonResult;
         }
 
@@ -177,7 +254,7 @@ json transcribe(json jsonBody) noexcept
             jsonResult["@type"] = "error";
             jsonResult["message"] = "WAV file  must be 16 kHz";
             drwav_uninit(&wav);
-            whisper_free(ctx);
+            release_ctx();
             return jsonResult;
         }
 
@@ -186,7 +263,7 @@ json transcribe(json jsonBody) noexcept
             jsonResult["@type"] = "error";
             jsonResult["message"] = "WAV file  must be 16 bit";
             drwav_uninit(&wav);
-            whisper_free(ctx);
+            release_ctx();
             return jsonResult;
         }
 
@@ -245,6 +322,10 @@ json transcribe(json jsonBody) noexcept
         wparams.no_context = params.no_context;
         wparams.suppress_nst = params.suppress_nst;
 
+        if (params.audio_ctx > 0) {
+            wparams.audio_ctx = params.audio_ctx;
+        }
+
         if (params.split_on_word) {
             wparams.max_len = 1;
             wparams.token_timestamps = true;
@@ -263,7 +344,7 @@ json transcribe(json jsonBody) noexcept
         {
             jsonResult["@type"] = "error";
             jsonResult["message"] = "failed to process audio";
-            whisper_free(ctx);
+            release_ctx();
             return jsonResult;
         }
 
@@ -311,7 +392,7 @@ json transcribe(json jsonBody) noexcept
     }
     jsonResult["text"] = text_result;
     
-    whisper_free(ctx);
+    release_ctx();
     return jsonResult;
 }
 extern "C"
@@ -336,6 +417,10 @@ extern "C"
                     jsonResult["message"] = e.what();
                     return jsonToChar(jsonResult);
                 }
+            }
+            if (jsonBody["@type"] == "releaseModel")
+            {
+                return jsonToChar(release_model());
             }
             if (jsonBody["@type"] == "getVersion")
             {

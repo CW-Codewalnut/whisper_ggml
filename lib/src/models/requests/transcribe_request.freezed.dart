@@ -66,6 +66,23 @@ mixin _$TranscribeRequest {
   /// Default `false` matches whisper.cpp's default.
   bool get suppressNonSpeechTokens;
 
+  /// Keep the loaded model resident in the native layer after this
+  /// request, so the next transcription with the same model file skips
+  /// the multi-second reload (push-to-talk dictation). Release the
+  /// resident model with `Whisper.releaseModel`, or by transcribing
+  /// once with this set back to `false`.
+  ///
+  /// Default `false` preserves the load-per-request behaviour of every
+  /// previous version.
+  bool get keepModelLoaded;
+
+  /// Sets `whisper_full_params.audio_ctx`: shrink the encoder window
+  /// for short clips (a large CPU speed-up). `0` keeps whisper.cpp's
+  /// default full window. Only pass a reduced value together with an
+  /// explicit [language] — auto-detection over a truncated window
+  /// misfires.
+  int get audioCtx;
+
   /// Create a copy of TranscribeRequest
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -109,33 +126,40 @@ mixin _$TranscribeRequest {
                 other.noContext == noContext) &&
             (identical(
                     other.suppressNonSpeechTokens, suppressNonSpeechTokens) ||
-                other.suppressNonSpeechTokens == suppressNonSpeechTokens));
+                other.suppressNonSpeechTokens == suppressNonSpeechTokens) &&
+            (identical(other.keepModelLoaded, keepModelLoaded) ||
+                other.keepModelLoaded == keepModelLoaded) &&
+            (identical(other.audioCtx, audioCtx) ||
+                other.audioCtx == audioCtx));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      audio,
-      isTranslate,
-      threads,
-      isVerbose,
-      language,
-      isSpecialTokens,
-      isNoTimestamps,
-      isRealtime,
-      nProcessors,
-      splitOnWord,
-      noFallback,
-      diarize,
-      speedUp,
-      realtimeStream,
-      initialPrompt,
-      noContext,
-      suppressNonSpeechTokens);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        audio,
+        isTranslate,
+        threads,
+        isVerbose,
+        language,
+        isSpecialTokens,
+        isNoTimestamps,
+        isRealtime,
+        nProcessors,
+        splitOnWord,
+        noFallback,
+        diarize,
+        speedUp,
+        realtimeStream,
+        initialPrompt,
+        noContext,
+        suppressNonSpeechTokens,
+        keepModelLoaded,
+        audioCtx
+      ]);
 
   @override
   String toString() {
-    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens)';
+    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
   }
 }
 
@@ -162,7 +186,9 @@ abstract mixin class $TranscribeRequestCopyWith<$Res> {
       Stream<String>? realtimeStream,
       String? initialPrompt,
       bool noContext,
-      bool suppressNonSpeechTokens});
+      bool suppressNonSpeechTokens,
+      bool keepModelLoaded,
+      int audioCtx});
 }
 
 /// @nodoc
@@ -195,6 +221,8 @@ class _$TranscribeRequestCopyWithImpl<$Res>
     Object? initialPrompt = freezed,
     Object? noContext = null,
     Object? suppressNonSpeechTokens = null,
+    Object? keepModelLoaded = null,
+    Object? audioCtx = null,
   }) {
     return _then(_self.copyWith(
       audio: null == audio
@@ -265,6 +293,14 @@ class _$TranscribeRequestCopyWithImpl<$Res>
           ? _self.suppressNonSpeechTokens
           : suppressNonSpeechTokens // ignore: cast_nullable_to_non_nullable
               as bool,
+      keepModelLoaded: null == keepModelLoaded
+          ? _self.keepModelLoaded
+          : keepModelLoaded // ignore: cast_nullable_to_non_nullable
+              as bool,
+      audioCtx: null == audioCtx
+          ? _self.audioCtx
+          : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -379,7 +415,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             Stream<String>? realtimeStream,
             String? initialPrompt,
             bool noContext,
-            bool suppressNonSpeechTokens)?
+            bool suppressNonSpeechTokens,
+            bool keepModelLoaded,
+            int audioCtx)?
         $default, {
     required TResult orElse(),
   }) {
@@ -403,7 +441,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             _that.realtimeStream,
             _that.initialPrompt,
             _that.noContext,
-            _that.suppressNonSpeechTokens);
+            _that.suppressNonSpeechTokens,
+            _that.keepModelLoaded,
+            _that.audioCtx);
       case _:
         return orElse();
     }
@@ -441,7 +481,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             Stream<String>? realtimeStream,
             String? initialPrompt,
             bool noContext,
-            bool suppressNonSpeechTokens)
+            bool suppressNonSpeechTokens,
+            bool keepModelLoaded,
+            int audioCtx)
         $default,
   ) {
     final _that = this;
@@ -464,7 +506,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             _that.realtimeStream,
             _that.initialPrompt,
             _that.noContext,
-            _that.suppressNonSpeechTokens);
+            _that.suppressNonSpeechTokens,
+            _that.keepModelLoaded,
+            _that.audioCtx);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -501,7 +545,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             Stream<String>? realtimeStream,
             String? initialPrompt,
             bool noContext,
-            bool suppressNonSpeechTokens)?
+            bool suppressNonSpeechTokens,
+            bool keepModelLoaded,
+            int audioCtx)?
         $default,
   ) {
     final _that = this;
@@ -524,7 +570,9 @@ extension TranscribeRequestPatterns on TranscribeRequest {
             _that.realtimeStream,
             _that.initialPrompt,
             _that.noContext,
-            _that.suppressNonSpeechTokens);
+            _that.suppressNonSpeechTokens,
+            _that.keepModelLoaded,
+            _that.audioCtx);
       case _:
         return null;
     }
@@ -551,7 +599,9 @@ class _TranscribeRequest extends TranscribeRequest {
       this.realtimeStream = null,
       this.initialPrompt = null,
       this.noContext = false,
-      this.suppressNonSpeechTokens = false})
+      this.suppressNonSpeechTokens = false,
+      this.keepModelLoaded = false,
+      this.audioCtx = 0})
       : super._();
 
   @override
@@ -639,6 +689,27 @@ class _TranscribeRequest extends TranscribeRequest {
   @JsonKey()
   final bool suppressNonSpeechTokens;
 
+  /// Keep the loaded model resident in the native layer after this
+  /// request, so the next transcription with the same model file skips
+  /// the multi-second reload (push-to-talk dictation). Release the
+  /// resident model with `Whisper.releaseModel`, or by transcribing
+  /// once with this set back to `false`.
+  ///
+  /// Default `false` preserves the load-per-request behaviour of every
+  /// previous version.
+  @override
+  @JsonKey()
+  final bool keepModelLoaded;
+
+  /// Sets `whisper_full_params.audio_ctx`: shrink the encoder window
+  /// for short clips (a large CPU speed-up). `0` keeps whisper.cpp's
+  /// default full window. Only pass a reduced value together with an
+  /// explicit [language] — auto-detection over a truncated window
+  /// misfires.
+  @override
+  @JsonKey()
+  final int audioCtx;
+
   /// Create a copy of TranscribeRequest
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -682,33 +753,40 @@ class _TranscribeRequest extends TranscribeRequest {
                 other.noContext == noContext) &&
             (identical(
                     other.suppressNonSpeechTokens, suppressNonSpeechTokens) ||
-                other.suppressNonSpeechTokens == suppressNonSpeechTokens));
+                other.suppressNonSpeechTokens == suppressNonSpeechTokens) &&
+            (identical(other.keepModelLoaded, keepModelLoaded) ||
+                other.keepModelLoaded == keepModelLoaded) &&
+            (identical(other.audioCtx, audioCtx) ||
+                other.audioCtx == audioCtx));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      audio,
-      isTranslate,
-      threads,
-      isVerbose,
-      language,
-      isSpecialTokens,
-      isNoTimestamps,
-      isRealtime,
-      nProcessors,
-      splitOnWord,
-      noFallback,
-      diarize,
-      speedUp,
-      realtimeStream,
-      initialPrompt,
-      noContext,
-      suppressNonSpeechTokens);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        audio,
+        isTranslate,
+        threads,
+        isVerbose,
+        language,
+        isSpecialTokens,
+        isNoTimestamps,
+        isRealtime,
+        nProcessors,
+        splitOnWord,
+        noFallback,
+        diarize,
+        speedUp,
+        realtimeStream,
+        initialPrompt,
+        noContext,
+        suppressNonSpeechTokens,
+        keepModelLoaded,
+        audioCtx
+      ]);
 
   @override
   String toString() {
-    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens)';
+    return 'TranscribeRequest(audio: $audio, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, isRealtime: $isRealtime, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, diarize: $diarize, speedUp: $speedUp, realtimeStream: $realtimeStream, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
   }
 }
 
@@ -737,7 +815,9 @@ abstract mixin class _$TranscribeRequestCopyWith<$Res>
       Stream<String>? realtimeStream,
       String? initialPrompt,
       bool noContext,
-      bool suppressNonSpeechTokens});
+      bool suppressNonSpeechTokens,
+      bool keepModelLoaded,
+      int audioCtx});
 }
 
 /// @nodoc
@@ -770,6 +850,8 @@ class __$TranscribeRequestCopyWithImpl<$Res>
     Object? initialPrompt = freezed,
     Object? noContext = null,
     Object? suppressNonSpeechTokens = null,
+    Object? keepModelLoaded = null,
+    Object? audioCtx = null,
   }) {
     return _then(_TranscribeRequest(
       audio: null == audio
@@ -840,6 +922,14 @@ class __$TranscribeRequestCopyWithImpl<$Res>
           ? _self.suppressNonSpeechTokens
           : suppressNonSpeechTokens // ignore: cast_nullable_to_non_nullable
               as bool,
+      keepModelLoaded: null == keepModelLoaded
+          ? _self.keepModelLoaded
+          : keepModelLoaded // ignore: cast_nullable_to_non_nullable
+              as bool,
+      audioCtx: null == audioCtx
+          ? _self.audioCtx
+          : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }

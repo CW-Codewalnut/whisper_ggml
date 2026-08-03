@@ -48,6 +48,10 @@ mixin _$TranscribeRequestDto {
   /// invokes with transcription progress (0–100); null disables it.
   @JsonKey(name: 'progress_callback')
   int? get progressCallback;
+  @JsonKey(name: 'keep_model_loaded')
+  bool get keepModelLoaded;
+  @JsonKey(name: 'audio_ctx')
+  int get audioCtx;
 
   /// Create a copy of TranscribeRequestDto
   /// with the given fields replaced by the non-null parameter values.
@@ -96,35 +100,42 @@ mixin _$TranscribeRequestDto {
                     other.suppressNonSpeechTokens, suppressNonSpeechTokens) ||
                 other.suppressNonSpeechTokens == suppressNonSpeechTokens) &&
             (identical(other.progressCallback, progressCallback) ||
-                other.progressCallback == progressCallback));
+                other.progressCallback == progressCallback) &&
+            (identical(other.keepModelLoaded, keepModelLoaded) ||
+                other.keepModelLoaded == keepModelLoaded) &&
+            (identical(other.audioCtx, audioCtx) ||
+                other.audioCtx == audioCtx));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      audio,
-      model,
-      isTranslate,
-      threads,
-      isVerbose,
-      language,
-      isSpecialTokens,
-      isNoTimestamps,
-      nProcessors,
-      splitOnWord,
-      noFallback,
-      isRealtime,
-      diarize,
-      speedUp,
-      initialPrompt,
-      noContext,
-      suppressNonSpeechTokens,
-      progressCallback);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        audio,
+        model,
+        isTranslate,
+        threads,
+        isVerbose,
+        language,
+        isSpecialTokens,
+        isNoTimestamps,
+        nProcessors,
+        splitOnWord,
+        noFallback,
+        isRealtime,
+        diarize,
+        speedUp,
+        initialPrompt,
+        noContext,
+        suppressNonSpeechTokens,
+        progressCallback,
+        keepModelLoaded,
+        audioCtx
+      ]);
 
   @override
   String toString() {
-    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback)';
+    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
   }
 }
 
@@ -152,7 +163,9 @@ abstract mixin class $TranscribeRequestDtoCopyWith<$Res> {
       @JsonKey(name: 'initial_prompt') String? initialPrompt,
       @JsonKey(name: 'no_context') bool noContext,
       @JsonKey(name: 'suppress_non_speech_tokens') bool suppressNonSpeechTokens,
-      @JsonKey(name: 'progress_callback') int? progressCallback});
+      @JsonKey(name: 'progress_callback') int? progressCallback,
+      @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
+      @JsonKey(name: 'audio_ctx') int audioCtx});
 }
 
 /// @nodoc
@@ -186,6 +199,8 @@ class _$TranscribeRequestDtoCopyWithImpl<$Res>
     Object? noContext = null,
     Object? suppressNonSpeechTokens = null,
     Object? progressCallback = freezed,
+    Object? keepModelLoaded = null,
+    Object? audioCtx = null,
   }) {
     return _then(_self.copyWith(
       audio: null == audio
@@ -260,6 +275,14 @@ class _$TranscribeRequestDtoCopyWithImpl<$Res>
           ? _self.progressCallback
           : progressCallback // ignore: cast_nullable_to_non_nullable
               as int?,
+      keepModelLoaded: null == keepModelLoaded
+          ? _self.keepModelLoaded
+          : keepModelLoaded // ignore: cast_nullable_to_non_nullable
+              as bool,
+      audioCtx: null == audioCtx
+          ? _self.audioCtx
+          : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -376,7 +399,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             @JsonKey(name: 'no_context') bool noContext,
             @JsonKey(name: 'suppress_non_speech_tokens')
             bool suppressNonSpeechTokens,
-            @JsonKey(name: 'progress_callback') int? progressCallback)?
+            @JsonKey(name: 'progress_callback') int? progressCallback,
+            @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
+            @JsonKey(name: 'audio_ctx') int audioCtx)?
         $default, {
     required TResult orElse(),
   }) {
@@ -401,7 +426,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             _that.initialPrompt,
             _that.noContext,
             _that.suppressNonSpeechTokens,
-            _that.progressCallback);
+            _that.progressCallback,
+            _that.keepModelLoaded,
+            _that.audioCtx);
       case _:
         return orElse();
     }
@@ -441,7 +468,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             @JsonKey(name: 'no_context') bool noContext,
             @JsonKey(name: 'suppress_non_speech_tokens')
             bool suppressNonSpeechTokens,
-            @JsonKey(name: 'progress_callback') int? progressCallback)
+            @JsonKey(name: 'progress_callback') int? progressCallback,
+            @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
+            @JsonKey(name: 'audio_ctx') int audioCtx)
         $default,
   ) {
     final _that = this;
@@ -465,7 +494,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             _that.initialPrompt,
             _that.noContext,
             _that.suppressNonSpeechTokens,
-            _that.progressCallback);
+            _that.progressCallback,
+            _that.keepModelLoaded,
+            _that.audioCtx);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -504,7 +535,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             @JsonKey(name: 'no_context') bool noContext,
             @JsonKey(name: 'suppress_non_speech_tokens')
             bool suppressNonSpeechTokens,
-            @JsonKey(name: 'progress_callback') int? progressCallback)?
+            @JsonKey(name: 'progress_callback') int? progressCallback,
+            @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
+            @JsonKey(name: 'audio_ctx') int audioCtx)?
         $default,
   ) {
     final _that = this;
@@ -528,7 +561,9 @@ extension TranscribeRequestDtoPatterns on TranscribeRequestDto {
             _that.initialPrompt,
             _that.noContext,
             _that.suppressNonSpeechTokens,
-            _that.progressCallback);
+            _that.progressCallback,
+            _that.keepModelLoaded,
+            _that.audioCtx);
       case _:
         return null;
     }
@@ -557,7 +592,9 @@ class _TranscribeRequestDto extends TranscribeRequestDto {
       @JsonKey(name: 'no_context') this.noContext = false,
       @JsonKey(name: 'suppress_non_speech_tokens')
       this.suppressNonSpeechTokens = false,
-      @JsonKey(name: 'progress_callback') this.progressCallback})
+      @JsonKey(name: 'progress_callback') this.progressCallback,
+      @JsonKey(name: 'keep_model_loaded') this.keepModelLoaded = false,
+      @JsonKey(name: 'audio_ctx') this.audioCtx = 0})
       : super._();
   factory _TranscribeRequestDto.fromJson(Map<String, dynamic> json) =>
       _$TranscribeRequestDtoFromJson(json);
@@ -614,6 +651,12 @@ class _TranscribeRequestDto extends TranscribeRequestDto {
   @override
   @JsonKey(name: 'progress_callback')
   final int? progressCallback;
+  @override
+  @JsonKey(name: 'keep_model_loaded')
+  final bool keepModelLoaded;
+  @override
+  @JsonKey(name: 'audio_ctx')
+  final int audioCtx;
 
   /// Create a copy of TranscribeRequestDto
   /// with the given fields replaced by the non-null parameter values.
@@ -667,35 +710,42 @@ class _TranscribeRequestDto extends TranscribeRequestDto {
                     other.suppressNonSpeechTokens, suppressNonSpeechTokens) ||
                 other.suppressNonSpeechTokens == suppressNonSpeechTokens) &&
             (identical(other.progressCallback, progressCallback) ||
-                other.progressCallback == progressCallback));
+                other.progressCallback == progressCallback) &&
+            (identical(other.keepModelLoaded, keepModelLoaded) ||
+                other.keepModelLoaded == keepModelLoaded) &&
+            (identical(other.audioCtx, audioCtx) ||
+                other.audioCtx == audioCtx));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      audio,
-      model,
-      isTranslate,
-      threads,
-      isVerbose,
-      language,
-      isSpecialTokens,
-      isNoTimestamps,
-      nProcessors,
-      splitOnWord,
-      noFallback,
-      isRealtime,
-      diarize,
-      speedUp,
-      initialPrompt,
-      noContext,
-      suppressNonSpeechTokens,
-      progressCallback);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        audio,
+        model,
+        isTranslate,
+        threads,
+        isVerbose,
+        language,
+        isSpecialTokens,
+        isNoTimestamps,
+        nProcessors,
+        splitOnWord,
+        noFallback,
+        isRealtime,
+        diarize,
+        speedUp,
+        initialPrompt,
+        noContext,
+        suppressNonSpeechTokens,
+        progressCallback,
+        keepModelLoaded,
+        audioCtx
+      ]);
 
   @override
   String toString() {
-    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback)';
+    return 'TranscribeRequestDto(audio: $audio, model: $model, isTranslate: $isTranslate, threads: $threads, isVerbose: $isVerbose, language: $language, isSpecialTokens: $isSpecialTokens, isNoTimestamps: $isNoTimestamps, nProcessors: $nProcessors, splitOnWord: $splitOnWord, noFallback: $noFallback, isRealtime: $isRealtime, diarize: $diarize, speedUp: $speedUp, initialPrompt: $initialPrompt, noContext: $noContext, suppressNonSpeechTokens: $suppressNonSpeechTokens, progressCallback: $progressCallback, keepModelLoaded: $keepModelLoaded, audioCtx: $audioCtx)';
   }
 }
 
@@ -725,7 +775,9 @@ abstract mixin class _$TranscribeRequestDtoCopyWith<$Res>
       @JsonKey(name: 'initial_prompt') String? initialPrompt,
       @JsonKey(name: 'no_context') bool noContext,
       @JsonKey(name: 'suppress_non_speech_tokens') bool suppressNonSpeechTokens,
-      @JsonKey(name: 'progress_callback') int? progressCallback});
+      @JsonKey(name: 'progress_callback') int? progressCallback,
+      @JsonKey(name: 'keep_model_loaded') bool keepModelLoaded,
+      @JsonKey(name: 'audio_ctx') int audioCtx});
 }
 
 /// @nodoc
@@ -759,6 +811,8 @@ class __$TranscribeRequestDtoCopyWithImpl<$Res>
     Object? noContext = null,
     Object? suppressNonSpeechTokens = null,
     Object? progressCallback = freezed,
+    Object? keepModelLoaded = null,
+    Object? audioCtx = null,
   }) {
     return _then(_TranscribeRequestDto(
       audio: null == audio
@@ -833,6 +887,14 @@ class __$TranscribeRequestDtoCopyWithImpl<$Res>
           ? _self.progressCallback
           : progressCallback // ignore: cast_nullable_to_non_nullable
               as int?,
+      keepModelLoaded: null == keepModelLoaded
+          ? _self.keepModelLoaded
+          : keepModelLoaded // ignore: cast_nullable_to_non_nullable
+              as bool,
+      audioCtx: null == audioCtx
+          ? _self.audioCtx
+          : audioCtx // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
