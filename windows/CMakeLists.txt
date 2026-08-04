@@ -48,6 +48,12 @@ file(GLOB GGML_SRC
 
 add_library(whisper_ggml_core STATIC ${GGML_SRC} ${W}/src/whisper.cpp)
 set_target_properties(whisper_ggml_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+if(MSVC)
+  # Vendored upstream C code (ggml/whisper.cpp): its int/float narrowing
+  # is upstream's business, and the C4244/C4267/C4305 flood buries real
+  # warnings from our own sources in every CI build log.
+  target_compile_options(whisper_ggml_core PRIVATE /wd4244 /wd4267 /wd4305)
+endif()
 target_include_directories(whisper_ggml_core PUBLIC
     ${W}/include
     ${W}/ggml/include
@@ -83,6 +89,10 @@ add_library(whisper_ggml_plugin SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/../android/src/whisper/main.cpp
 )
 set_target_properties(whisper_ggml_plugin PROPERTIES OUTPUT_NAME "whisper_ggml")
+if(MSVC)
+  # The shim vendors drwav and follows upstream's loose narrowing too.
+  target_compile_options(whisper_ggml_plugin PRIVATE /wd4244 /wd4267 /wd4305)
+endif()
 target_compile_definitions(whisper_ggml_plugin PUBLIC DART_SHARED_LIB)
 target_link_libraries(whisper_ggml_plugin PRIVATE whisper_ggml_core)
 
