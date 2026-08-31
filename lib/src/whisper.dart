@@ -61,7 +61,9 @@ class Whisper {
           json.decode(res.toDartString()) as Map<String, dynamic>;
 
       malloc.free(data);
-      // Native responses are malloc'd specifically so this free is valid.
+      // Valid on every platform: the native side allocates responses with
+      // the allocator package:ffi's malloc.free actually uses (C malloc on
+      // POSIX, CoTaskMemAlloc on Windows - see jsonToChar in main.cpp).
       malloc.free(res);
       return result;
     });

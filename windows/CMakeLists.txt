@@ -94,7 +94,9 @@ if(MSVC)
   target_compile_options(whisper_ggml_plugin PRIVATE /wd4244 /wd4267 /wd4305)
 endif()
 target_compile_definitions(whisper_ggml_plugin PUBLIC DART_SHARED_LIB)
-target_link_libraries(whisper_ggml_plugin PRIVATE whisper_ggml_core)
+# ole32 for CoTaskMemAlloc: responses crossing the FFI boundary must come
+# from the allocator Dart's malloc.free actually uses on Windows.
+target_link_libraries(whisper_ggml_plugin PRIVATE whisper_ggml_core ole32)
 
 # List of absolute paths to libraries that should be bundled with the plugin.
 set(whisper_ggml_bundled_libraries

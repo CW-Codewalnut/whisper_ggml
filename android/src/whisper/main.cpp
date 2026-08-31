@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include "json/json.hpp"
 
+#ifdef _WIN32
+#include <objbase.h>
+#endif
+
 using json = nlohmann::json;
 
 char *jsonToChar(json jsonData) noexcept
@@ -25,9 +29,16 @@ char *jsonToChar(json jsonData) noexcept
     // across the FFI boundary. Replace invalid bytes with U+FFFD instead.
     std::string result =
         jsonData.dump(-1, ' ', false, json::error_handler_t::replace);
-    // malloc, not new[]: callers across the FFI boundary free this
-    // with the C allocator (Dart's malloc.free).
+    // The Dart side frees this with package:ffi's malloc.free, which is
+    // the C allocator on POSIX platforms but CoTaskMemFree on Windows.
+    // The allocation must match per platform: a CRT malloc released
+    // through CoTaskMemFree corrupts the heap, and a debug CRT aborts
+    // the whole process on the first response.
+#ifdef _WIN32
+    char *ch = (char *)CoTaskMemAlloc(result.size() + 1);
+#else
     char *ch = (char *)malloc(result.size() + 1);
+#endif
     strcpy(ch, result.c_str());
     return ch;
 }
